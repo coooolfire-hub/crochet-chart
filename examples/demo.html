@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>crochet-chart demo</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 880px; padding: 0 1rem; }
+  label { margin-right: 1rem; }
+  #out { margin-top: 1.5rem; overflow-x: auto; }
+  pre { background: #f6f6f6; border: 1px solid #ddd; padding: 1rem; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>crochet-chart demo</h1>
+<p>Pick an image, get a colorwork chart plus row-by-row written instructions. Everything runs locally in your browser.</p>
+<p>
+  <input type="file" id="file" accept="image/*">
+  <label>Grid width (stitches) <input type="number" id="gw" value="40" min="8" max="128" style="width:5em"></label>
+  <label>Max colors <input type="number" id="mc" value="8" min="2" max="20" style="width:4em"></label>
+  <button id="go">Generate</button>
+</p>
+<div id="out"></div>
+<script type="module">
+  import { imageDataToChart, chartToSVG, instructionsToText } from '../src/index.js';
+  import { yarn20 } from '../palettes/yarn-20.js';
+
+  const out = document.getElementById('out');
+  document.getElementById('go').addEventListener('click', () => {
+    const f = document.getElementById('file').files[0];
+    if (!f) { out.textContent = 'Choose an image first.'; return; }
+    const img = new Image();
+    img.onload = () => {
+      const cv = document.createElement('canvas');
+      cv.width = img.naturalWidth;
+      cv.height = img.naturalHeight;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, cv.width, cv.height);
+      const chart = imageDataToChart(data.data, cv.width, cv.height, {
+        gridWidth: parseInt(document.getElementById('gw').value, 10),
+        maxColors: parseInt(document.getElementById('mc').value, 10),
+        palette: yarn20,
+      });
+      let html = chartToSVG(chart);
+      html += '<p>' + chart.gridWidth + ' stitches x ' + chart.gridHeight + ' rows, ' + chart.totalStitches + ' stitches total, ' + chart.stats.length + ' colors</p>';
+      html += '<h2>Written instructions (worked bottom-up)</h2>';
+      const pre = document.createElement('pre');
+      pre.textContent = instructionsToText(chart);
+      out.innerHTML = html;
+      out.appendChild(pre);
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(f);
+  });
+</script>
+</body>
+</html>
