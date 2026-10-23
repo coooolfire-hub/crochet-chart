@@ -1,5 +1,7 @@
 # crochet-chart
 
+[![npm version](https://img.shields.io/npm/v/crochet-chart.svg)](https://www.npmjs.com/package/crochet-chart) [![npm downloads](https://img.shields.io/npm/dm/crochet-chart.svg)](https://www.npmjs.com/package/crochet-chart)
+
 Turn any image into a **crochet / knitting colorwork chart** whose main
 output is **row-by-row written instructions in working order**
 (run-length encoded), plus a yarn summary and an SVG chart.
